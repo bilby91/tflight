@@ -1,0 +1,60 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+require 'commander/import'
+require 'rest_client'
+require 'json'
+
+TESTFLIGHT_ENDPOINT = 'http://testflightapp.com/api/builds.json'
+
+program :name, 'tflight'
+program :version, '1.0.0'
+program :description, 'One line deploy for all your beta testers.'
+
+command :deploy do |c|
+  c.syntax      = 'tflight deploy [options]'
+  c.summary     = 'Builds, signs and deploys.'
+  c.description = 'This commands builds your application with all its dependencys, signs your .app file generating a .ipa and deploys it to testflight.'
+
+  c.option '--app String',   'The application you want to deploy'
+  c.option '--notes String', 'The release notes'
+
+  c.action do |args, options|
+
+    api_token  = ENV['TESTFLIGHT_API_TOKEN']
+    team_token = ENV['TESTFLIGHT_TEAM_TOKEN']
+
+    config = JSON.parse File.read(".testflight")
+
+    unless (app_name = options.app)
+      say 'You need to provide the name of the app you want to deploy.'
+      abort
+    end
+
+    build_success = %x{xcodebuild -scheme '#{config['scheme']}' -workspace '#{config['workspace']}' -configuration #{config['configuration']}}
+    sign_success  = %x{xcrun -sdk iphoneos PackageApplication -v '#{config['build_path']}/#{app_name}.app' -o ${PWD}/#{app_name}.ipa}
+
+    params = {
+
+      file:               File.new("#{app_name}.ipa"),
+      api_token:          api_token,
+      team_token:         team_token,
+      notes:              notes,
+      notify:             config['notify'],
+      distribution_lists: config['distribution_list']
+
+    }
+
+    begin
+      response = RestClient.post(TESTFLIGHT_ENDPOINT,params, accetp: :json)
+    rescue => e
+      response = e.response
+    end
+
+    if (response.code == 200 || response.code == 201)
+      say "Upload succeeded, #{app_name} is now in the hands of all your beta testers :)."
+    else
+      say response
+    end
+  end
+end
