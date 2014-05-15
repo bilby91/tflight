@@ -2,7 +2,7 @@
 
 [![Twitter](https://img.shields.io/badge/contact-@bilby91-green.svg)](http://twitter.com/bilby91)
 [![License MIT](https://go-shields.herokuapp.com/license-MIT-blue.png)]()
-
+[![Gem Version](https://badge.fury.io/rb/tflight.svg)](http://badge.fury.io/rb/tflight)
 
 ## Usage 
 
@@ -14,14 +14,14 @@ The second step we need to take is add a configuration file in the root of your 
 
 It should look something like this:
 
-````json
+````
 {
-	"workspace": 			   "YourApp.xcworkspace",
-  "scheme":     			   "YourAppSheme",
-  "configuration": 		 "Release",
-  "build_path": 			   "./Build/Products/Release-iphoneos",
+  "workspace": 	       "YourApp.xcworkspace",
+  "scheme":            "YourAppSheme",
+  "configuration":     "Release",
+  "build_path":        "./Build/Products/Release-iphoneos",
   "distribution_list": "ListName",
-  "notify":				     true
+  "notify":	       true
  }
 ````
 
